@@ -173,11 +173,11 @@ assert np.allclose(initial_state, qc.state_vector)
 print("\nVerification successful: IQFT(QFT(|psi>)) == |psi>")
 ```
 
-**Circuit Diagram (3 Qubits):**
+**QFT Circuit Diagram (3 Qubits):**
 
 ```mermaid
 graph TD
-    subgraph "Quantum Fourier Transform - 3 Qubits"
+    subgraph QFT_Circuit ["Quantum Fourier Transform - 3 Qubits"]
         %% Input states
         q0_in["|x0⟩"] --> H0[H] 
         q1_in["|x1⟩"] --> H1[H]
@@ -260,7 +260,7 @@ print(f"Probability of finding |{marked_state_str}>: {probabilities[int(marked_s
 assert most_likely_state == int(marked_state_str, 2)
 print("\nVerification successful: Grover's algorithm found the marked state.")
 
-**Circuit Diagram (1 Iteration):**
+**Grover's Single Iteration Circuit:**
 
 ```mermaid
 graph LR
@@ -305,33 +305,33 @@ graph LR
 
 The crowning achievement of the CHAOS simulator is its ability to run the quantum period-finding subroutine of Shor's algorithm. This algorithm is the key to breaking modern RSA encryption and demonstrates a significant quantum advantage.
 
-**High-Level Circuit Diagram:**
+**Shor's Period-Finding Circuit:**
 
 ```mermaid
 graph TD
-    subgraph "Shor's Algorithm - Period Finding Circuit"
+    subgraph Shor_Circuit ["Shor's Algorithm - Period Finding Circuit"]
         %% Control register initialization
-        subgraph "Control Register - 2n qubits"
+        subgraph Control_Reg ["Control Register - 2n qubits"]
             c_init["|0⟩⊗2n"] --> H_all["H⊗2n<br/>(Superposition)"] --> c_super["|+⟩⊗2n"]
         end
         
         %% Target register initialization  
-        subgraph "Target Register - n qubits"
+        subgraph Target_Reg ["Target Register - n qubits"]
             t_init["|1⟩"] --> t_ready["|1⟩"]
         end
         
         %% Modular exponentiation
-        subgraph "Modular Exponentiation"
+        subgraph ModExp ["Modular Exponentiation"]
             mod_exp["Controlled-U_a<br/>|x⟩|y⟩ → |x⟩|y·a^x mod N⟩"]
         end
         
         %% Quantum Fourier Transform
-        subgraph "Inverse QFT"
+        subgraph IQFT_Block ["Inverse QFT"]
             iqft["QFT⁻¹<br/>(Extract Period Info)"]
         end
         
         %% Measurement
-        subgraph "Classical Processing"
+        subgraph Classical ["Classical Processing"]
             measure["Measure Control<br/>Register"] --> classical["Continued Fractions<br/>→ Period r"]
         end
         
