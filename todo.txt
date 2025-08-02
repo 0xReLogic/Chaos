@@ -30,9 +30,9 @@ FASE 1: Partikel Kuantum (The Qubit)
 [x] Milestone 1.3: Implementasikan fungsi measure() yang akan "meruntuhkan" superposisi Qubit menjadi 0 atau 1 berdasarkan probabilitas amplitudonya.
 
 FASE 2: Hukum Fisika (The Quantum Gates)
-[ ] Milestone 2.1: Representasikan setiap gerbang kuantum (Pauli-X, Hadamard, CNOT) sebagai matriks 2x2 atau 4x4.
+[x] Milestone 2.1: Representasikan setiap gerbang kuantum (Pauli-X, Hadamard, CNOT) sebagai matriks 2x2 atau 4x4.
 
-[ ] Milestone 2.2: Buat fungsi apply_gate(qubit, gate) yang melakukan perkalian matriks untuk mengubah keadaan Qubit.
+[x] Milestone 2.2: Buat fungsi apply_gate(qubit, gate) yang melakukan perkalian matriks untuk mengubah keadaan Qubit.
 
 Definisi "Menang": Lo bisa mengambil Qubit di keadaan |0⟩, menerapkan gerbang Hadamard, lalu mengukurnya berulang kali dan mendapatkan hasil yang 50% 0 dan 50% 1. Lo sudah berhasil menciptakan probabilitas kuantum.
 
