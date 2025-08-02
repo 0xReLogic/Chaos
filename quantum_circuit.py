@@ -55,6 +55,7 @@ class QuantumCircuit:
         # Store the operation for later execution
         self.operations.append(("single", gate, qubit_index))
     
+
     def apply_controlled_gate(self, gate: Union[str, QuantumGate], control_index: int, target_index: int) -> None:
         """
         Add a controlled gate operation to the circuit.
@@ -91,7 +92,165 @@ class QuantumCircuit:
             target_index: The index of the target qubit
         """
         self.apply_controlled_gate("X", control_index, target_index)
+
+    def apply_c_rot(self, k: int, control_index: int, target_index: int) -> None:
+        """
+        Add a controlled-R_k rotation gate to the circuit's operations queue.
+
+        Args:
+            k (int): The rotation parameter for R_k.
+            control_index (int): The index of the control qubit.
+            target_index (int): The index of the target qubit.
+        """
+        if control_index < 0 or control_index >= self.num_qubits:
+            raise IndexError(f"Control qubit index {control_index} out of range")
+        if target_index < 0 or target_index >= self.num_qubits:
+            raise IndexError(f"Target qubit index {target_index} out of range")
+        if control_index == target_index:
+            raise ValueError("Control and target qubits must be different")
+        
+        self.operations.append(("c_rot", k, control_index, target_index))
+
+    def apply_qft(self, qubits: Optional[List[int]] = None, swaps: bool = True) -> None:
+        """
+        Add the Quantum Fourier Transform (QFT) operations to the circuit.
+
+        Args:
+            qubits: A list of qubit indices to apply QFT on. Defaults to all qubits.
+            swaps: Whether to add the final SWAP gates to reverse the qubit order.
+        """
+        if qubits is None:
+            qubits = list(range(self.num_qubits))
+        
+        n = len(qubits)
+
+        for i in range(n):
+            self.apply_gate('H', qubits[i])
+            for j in range(i + 1, n):
+                k = j - i + 1
+                self.apply_c_rot(k, qubits[j], qubits[i])
+
+        if swaps:
+            for i in range(n // 2):
+                self.apply_cnot(qubits[i], qubits[n - 1 - i])
+                self.apply_cnot(qubits[n - 1 - i], qubits[i])
+                self.apply_cnot(qubits[i], qubits[n - 1 - i])
+
+    def apply_iqft(self, qubits: Optional[List[int]] = None, swaps: bool = True) -> None:
+        """
+        Add the Inverse Quantum Fourier Transform (IQFT) operations to the circuit.
+        This is the precise mathematical inverse of the QFT operation.
+
+        Args:
+            qubits: A list of qubit indices to apply IQFT on. Defaults to all qubits.
+            swaps: Whether to add the initial SWAP gates to reverse the qubit order.
+        """
+        if qubits is None:
+            qubits = list(range(self.num_qubits))
+        
+        n = len(qubits)
+
+        if swaps:
+            for i in range(n // 2):
+                self.apply_cnot(qubits[i], qubits[n - 1 - i])
+                self.apply_cnot(qubits[n - 1 - i], qubits[i])
+                self.apply_cnot(qubits[i], qubits[n - 1 - i])
+
+        # The QFT algorithm applies H and C-ROTs in a nested loop.
+        # To get the inverse, we must apply the inverse of those gates in the exact reverse order.
+        # The last gate applied in QFT for n=3 was H on qubit 2.
+        # The first gate in IQFT must be H on qubit 2.
+        for i in reversed(range(n)):
+            # For a given qubit i, the QFT first applied H, then a series of C-ROTs.
+            # The inverse must first undo the C-ROTs, then undo the H.
+            
+            # Undo the C-ROT gates.
+            # The QFT loop was `for j in range(i + 1, n)`. The reverse is needed.
+            for j in reversed(range(i + 1, n)):
+                k = j - i + 1
+                self.apply_c_rot(-k, qubits[j], qubits[i])
+            
+            # Undo the Hadamard gate.
+            self.apply_gate('H', qubits[i])
     
+    def apply_oracle(self, marked_state_str: str) -> None:
+        """
+        Adds a phase-flip oracle for a specific computational basis state to the queue.
+
+        Args:
+            marked_state_str: A string representing the basis state to mark, e.g., '101'.
+        """
+        if len(marked_state_str) != self.num_qubits:
+            raise ValueError("Length of marked_state_str must equal the number of qubits.")
+        if not all(c in '01' for c in marked_state_str):
+            raise ValueError("marked_state_str must be a binary string.")
+
+        marked_state_int = int(marked_state_str, 2)
+        self.operations.append(("oracle", marked_state_int))
+
+    def apply_grover_iteration(self, marked_state_str: str) -> None:
+        """
+        Applies one full iteration of Grover's algorithm (Oracle + Amplifier).
+
+        Args:
+            marked_state_str: The computational basis state to search for, e.g., '101'.
+        """
+        # 1. Apply the oracle to mark the state
+        self.apply_oracle(marked_state_str)
+
+        # 2. Apply the diffusion operator to amplify the marked state's amplitude
+        self.apply_grover_amplifier()
+
+    def apply_modular_exponentiation(self, a: int, N: int, control_qubits: list[int], ancilla_qubits: list[int]):
+        """
+        Adds the full modular exponentiation circuit U_a: |x>|y> -> |x>|y * a^x mod N>.
+
+        This is constructed by applying controlled modular multipliers for each qubit
+        in the control register.
+
+        Args:
+            a: The base of the exponentiation.
+            N: The modulus.
+            control_qubits: The list of qubits representing the exponent x.
+            ancilla_qubits: The list of qubits representing the register y.
+        """
+        # The control qubits are processed from most significant to least significant
+        # to correspond to the powers of 2 in the exponent.
+        for i, control_qubit in enumerate(reversed(control_qubits)):
+            # The power of 'a' for this control qubit is 2^i
+            a_power_2_i = pow(a, 2**i, N)
+            self.apply_c_modular_multiplier(a_power_2_i, N, control_qubit, ancilla_qubits)
+
+    def apply_c_modular_multiplier(self, a: int, N: int, control_qubit: int, ancilla_qubits: list[int]):
+        """
+        Adds a controlled modular multiplier operation to the queue.
+
+        Args:
+            a: The base for the multiplication.
+            N: The modulus.
+            control_qubit: The index of the control qubit.
+            ancilla_qubits: A list of indices for the target ancilla qubits.
+        """
+        self.operations.append(("c_mod_mul", a, N, control_qubit, ancilla_qubits))
+
+    def apply_grover_amplifier(self) -> None:
+        """
+        Applies the Grover diffusion operator (amplifier).
+
+        This operator reflects the state vector about the mean amplitude,
+        amplifying the amplitude of the marked state.
+        It is constructed as H^(⊗n) @ (2|0><0| - I) @ H^(⊗n).
+        """
+        # Apply H to all qubits
+        self.apply_hadamard_to_all()
+
+        # Apply oracle for the |0...0> state
+        zero_state_str = '0' * self.num_qubits
+        self.apply_oracle(zero_state_str)
+
+        # Apply H to all qubits again
+        self.apply_hadamard_to_all()
+
     def apply_hadamard_to_all(self) -> None:
         """Apply the Hadamard gate to all qubits in the circuit."""
         for i in range(self.num_qubits):
@@ -131,10 +290,52 @@ class QuantumCircuit:
             
             # Tensor product with the operator built so far
             operator = np.kron(operator, current_gate_matrix)
-
-        # Apply the full operator to the state vector
+        
+        # Apply the gate operator to the state vector
         self.state_vector = operator @ self.state_vector
-    
+
+    def _apply_controlled_operator(self, gate_matrix: np.ndarray, control_qubit: int, target_qubits: list[int]):
+        """
+        Applies a generic controlled operator to the state vector by building the full matrix.
+
+        Args:
+            gate_matrix: The unitary matrix to be applied to the target qubits.
+            control_qubit: The index of the control qubit.
+            target_qubits: A list of indices for the target qubits.
+        """
+        num_total_qubits = self.num_qubits
+        total_dim = 2**num_total_qubits
+        final_op = np.zeros((total_dim, total_dim), dtype=complex)
+
+        control_mask = 1 << (num_total_qubits - 1 - control_qubit)
+        target_masks = [1 << (num_total_qubits - 1 - i) for i in target_qubits]
+        num_target_qubits = len(target_qubits)
+
+        for i in range(total_dim):
+            if (i & control_mask) == 0:
+                final_op[i, i] = 1
+            else:
+                target_state_val = 0
+                for k, mask in enumerate(target_masks):
+                    if (i & mask) != 0:
+                        target_state_val |= (1 << (num_target_qubits - 1 - k))
+                
+                result_vector = gate_matrix[:, target_state_val]
+
+                for new_target_val, amplitude in enumerate(result_vector):
+                    if not np.isclose(amplitude, 0):
+                        new_full_state_idx = i
+                        for mask in target_masks:
+                            new_full_state_idx &= ~mask
+                        
+                        for k, mask in enumerate(target_masks):
+                            if (new_target_val & (1 << (num_target_qubits - 1 - k))) != 0:
+                                new_full_state_idx |= mask
+
+                        final_op[new_full_state_idx, i] = amplitude
+        
+        self.state_vector = final_op @ self.state_vector
+
     def _execute_controlled_gate(self, gate: Union[str, QuantumGate], control_index: int, target_index: int) -> None:
         """
         Execute a controlled gate operation.
@@ -144,43 +345,59 @@ class QuantumCircuit:
             control_index: The index of the control qubit
             target_index: The index of the target qubit
         """
-        # Define projector matrices
-        P0 = np.array([[1, 0], [0, 0]], dtype=complex)  # Projector for |0⟩
-        P1 = np.array([[0, 0], [0, 1]], dtype=complex)  # Projector for |1⟩
-        
         # Ensure gate is a QuantumGate object
         if isinstance(gate, str):
             gate = SINGLE_QUBIT_GATES[gate]
 
-        # Build the two parts of the controlled operator
-        # Part 1: Control is |0⟩, apply Identity to target
-        # Part 2: Control is |1⟩, apply Gate to target
-        term1_list = []
-        term2_list = []
+        self._apply_controlled_operator(gate.matrix, control_index, [target_index])
 
-        for i in range(self.num_qubits):
-            if i == control_index:
-                term1_list.append(P0)
-                term2_list.append(P1)
-            elif i == target_index:
-                term1_list.append(I_GATE.matrix)
-                term2_list.append(gate.matrix)
+    def _execute_c_rot(self, k: int, control_index: int, target_index: int) -> None:
+        """
+        Execute a controlled-R_k rotation gate.
+        """
+        if k == 0:
+            return
+
+        angle_sign = -1 if k < 0 else 1
+        k_abs = abs(k)
+        theta = angle_sign * (2 * np.pi / (2**k_abs))
+        
+        r_k_matrix = np.array([
+            [1, 0],
+            [0, np.exp(1j * theta)]
+        ], dtype=complex)
+
+        self._apply_controlled_operator(r_k_matrix, control_index, [target_index])
+
+    def _execute_oracle(self, marked_state_int: int) -> None:
+        """
+        Executes the phase-flip oracle for a given marked state.
+
+        Args:
+            marked_state_int: The integer representation of the state to be marked.
+        """
+        oracle_matrix = np.identity(2**self.num_qubits, dtype=complex)
+        oracle_matrix[marked_state_int, marked_state_int] = -1
+        self.state_vector = oracle_matrix @ self.state_vector
+    
+    def _execute_c_modular_multiplier(self, a: int, N: int, control_qubit: int, ancilla_qubits: list[int]):
+        """
+        Executes a controlled modular multiplication: |y> -> |(a*y) mod N>.
+        """
+        num_ancilla = len(ancilla_qubits)
+        ancilla_size = 2**num_ancilla
+
+        # Create the permutation matrix for the modular multiplication on the ancilla
+        perm_matrix = np.zeros((ancilla_size, ancilla_size), dtype=complex)
+        for y in range(ancilla_size):
+            if y >= N:
+                perm_matrix[y, y] = 1
             else:
-                term1_list.append(I_GATE.matrix)
-                term2_list.append(I_GATE.matrix)
+                new_y = (a * y) % N
+                perm_matrix[new_y, y] = 1
 
-        # Build the full operators using tensor products
-        operator1 = term1_list[0]
-        operator2 = term2_list[0]
-        for i in range(1, self.num_qubits):
-            operator1 = np.kron(operator1, term1_list[i])
-            operator2 = np.kron(operator2, term2_list[i])
-            
-        # The final operator is the sum of the two parts
-        final_operator = operator1 + operator2
-
-        # Apply the full operator to the state vector
-        self.state_vector = final_operator @ self.state_vector
+        # Build and apply the full controlled gate operator
+        self._apply_controlled_operator(perm_matrix, control_qubit, ancilla_qubits)
     
     def run(self) -> None:
         """
@@ -196,71 +413,55 @@ class QuantumCircuit:
             elif operation[0] == "controlled":
                 _, gate, control_index, target_index = operation
                 self._execute_controlled_gate(gate, control_index, target_index)
+            elif operation[0] == "c_rot":
+                _, k, control_index, target_index = operation
+                self._execute_c_rot(k, control_index, target_index)
+            elif operation[0] == "oracle":
+                _, marked_state_int = operation
+                self._execute_oracle(marked_state_int)
+            elif operation[0] == "c_mod_mul":
+                _, a, N, control_qubit, ancilla_qubits = operation
+                self._execute_c_modular_multiplier(a, N, control_qubit, ancilla_qubits)
     
-    def measure(self, qubit_index: Optional[int] = None) -> Union[int, List[int]]:
+    def measure(self, qubit_index: Optional[Union[int, List[int]]] = None) -> Union[int, List[int]]:
         """
-        Measure one or all qubits in the circuit.
-        
+        Measure one, multiple, or all qubits in the circuit.
+
+        This method simulates measurement without collapsing the state vector for simplicity,
+        as the primary use case in this simulator is reading the final state.
+
         Args:
-            qubit_index: The index of the qubit to measure, or None to measure all qubits
-            
+            qubit_index: An int for a single qubit, a list of ints for multiple
+                         qubits, or None to measure all qubits.
+
         Returns:
-            If qubit_index is specified, returns the measurement result (0 or 1) for that qubit.
-            If qubit_index is None, returns a list of measurement results for all qubits.
-            
-        Raises:
-            IndexError: If the qubit index is out of range
+            An int for a single qubit measurement, or a list of ints for multiple.
         """
-        if qubit_index is not None:
-            if not (0 <= qubit_index < self.num_qubits):
-                raise IndexError(f"Qubit index {qubit_index} out of range for {self.num_qubits} qubits.")
-
-            # 1. Calculate the probability of measuring 0 for the specified qubit
-            prob_zero = 0
-            # The bit to check corresponds to the qubit's position from the left in binary representation (e.g., q2, q1, q0)
-            bit_position_mask = 1 << (self.num_qubits - 1 - qubit_index)
-
-            for i, amp in enumerate(self.state_vector):
-                # If the bit at the qubit's position is 0, add its probability to prob_zero
-                if (i & bit_position_mask) == 0:
-                    prob_zero += np.abs(amp)**2
-
-            # 2. Choose the measurement outcome based on the calculated probability
-            measured_value = 0 if random.random() < prob_zero else 1
-
-            # 3. Collapse the state vector
-            new_state_vector = np.zeros_like(self.state_vector)
-            for i, amp in enumerate(self.state_vector):
-                # Check if the bit at the qubit's position matches the measured value
-                is_match = ((i & bit_position_mask) != 0) == measured_value
-                if is_match:
-                    new_state_vector[i] = amp
-            
-            # 4. Normalize the new state vector
-            norm = np.linalg.norm(new_state_vector)
-            if norm == 0:
-                # This case should ideally not be reached in a valid quantum state
-                raise ValueError("Cannot collapse to a zero-norm state.")
-            self.state_vector = new_state_vector / norm
-
-            return measured_value
-
-        # Calculate probabilities for each state in the state vector
+        # Perform a full system measurement once
         probabilities = np.abs(self.state_vector)**2
-        
-        # Choose a state based on the probabilities
-        possible_states = np.arange(len(self.state_vector))
-        measured_state_index = np.random.choice(possible_states, p=probabilities)
-        
-        # Collapse the state vector to the measured state
-        self.state_vector = np.zeros_like(self.state_vector)
-        self.state_vector[measured_state_index] = 1
-        
-        # Convert the integer index to a list of classical bits
-        # Example: index 5 (101) for 3 qubits -> [1, 0, 1]
-        binary_representation = format(measured_state_index, f'0{self.num_qubits}b')
-        return [int(bit) for bit in binary_representation]
-    
+        # Ensure probabilities sum to 1 to avoid numpy errors with floating point inaccuracies
+        probabilities /= np.sum(probabilities)
+        basis_states = np.arange(2**self.num_qubits)
+        measured_state_int = random.choices(basis_states, weights=probabilities, k=1)[0]
+        full_measurement_str = format(measured_state_int, f'0{self.num_qubits}b')
+        full_results = [int(bit) for bit in full_measurement_str]
+
+        if qubit_index is None:
+            # Case 1: Measure all qubits
+            return full_results
+
+        if isinstance(qubit_index, list):
+            # Case 2: Measure a specific list of qubits
+            return [full_results[i] for i in qubit_index]
+
+        if isinstance(qubit_index, int):
+            # Case 3: Measure a single qubit
+            if not (0 <= qubit_index < self.num_qubits):
+                raise IndexError(f"Qubit index {qubit_index} out of range.")
+            return full_results[qubit_index]
+
+        raise TypeError(f"Invalid type for qubit_index: {type(qubit_index)}")
+
     def run_and_measure(self, qubit_index: Optional[int] = None) -> Union[int, List[int]]:
         """
         Run the circuit and then measure one or all qubits.
