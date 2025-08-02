@@ -1,8 +1,39 @@
 # CHAOS - A Physics-Accurate Quantum Computing Simulator
 
-**[View on GitHub](https://github.com/0xReLogic/Chaos)**
+<div align="center">
+
+[![Python](https://img.shields.io/badge/Python-3.8%2B-blue?logo=python&logoColor=white)](https://python.org)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![GitHub stars](https://img.shields.io/github/stars/0xReLogic/Chaos?style=social)](https://github.com/0xReLogic/Chaos/stargazers)
+[![GitHub forks](https://img.shields.io/github/forks/0xReLogic/Chaos?style=social)](https://github.com/0xReLogic/Chaos/network/members)
+[![Quantum](https://img.shields.io/badge/Quantum-Computing-blueviolet?logo=atom&logoColor=white)](https://en.wikipedia.org/wiki/Quantum_computing)
+[![NumPy](https://img.shields.io/badge/NumPy-Powered-orange?logo=numpy&logoColor=white)](https://numpy.org)
+
+**[View on GitHub](https://github.com/0xReLogic/Chaos)** | **[Documentation](#usage-guide)** | **[Examples](#advanced-algorithms)**
+
+</div>
 
 CHAOS is a multi-qubit quantum computing simulator built in Python. It is designed from the ground up to be physically accurate, modeling quantum phenomena like superposition and entanglement through a professional, state-vector-based architecture.
+
+## Table of Contents
+
+- [Vision & Philosophy](#vision--philosophy)
+- [Core Architectural Pillars](#core-architectural-pillars)
+- [Key Features](#key-features)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Usage Guide](#usage-guide)
+  - [Bell State Creation](#example-1-creating-a-bell-state-2-qubit-entanglement)
+  - [GHZ State Creation](#example-2-creating-a-ghz-state-multi-qubit-entanglement)
+- [Advanced Algorithms](#advanced-algorithms)
+  - [Quantum Fourier Transform](#quantum-fourier-transform-qft)
+  - [Grover's Search Algorithm](#grovers-search-algorithm)
+  - [Shor's Algorithm](#shors-algorithm-period-finding)
+- [API Reference](#api-reference)
+- [Testing](#testing)
+- [Contributing](#contributing)
+- [Future Roadmap](#future-roadmap)
+- [License](#license)
 
 ## Vision & Philosophy
 
@@ -20,23 +51,110 @@ The simulator's accuracy and power rest on three fundamental pillars:
 
 ## Key Features
 
--   **Stateful, Multi-Qubit Circuits**: Create circuits with any number of qubits.
--   **Rich State Visualization**: A human-readable `print()` output for any circuit, automatically calculating and displaying:
-    -   Marginal probabilities for each qubit.
-    -   An entanglement status (`Entangled` or `Separable`).
-    -   Full system state probabilities.
--   **Accurate Partial Measurement**: Measure a single qubit and watch the entire system state collapse correctly.
--   **Iconic State Generators**: Built-in functions to instantly create famous entangled states like the Bell State and GHZ State.
--   **Advanced Quantum Algorithms**: Fully verified implementations of the Quantum Fourier Transform (QFT) and Grover's Search Algorithm.
+### Core Capabilities
+-   **Stateful, Multi-Qubit Circuits**: Create and manage quantum circuits with any number of qubits
+-   **Physics-Accurate Simulation**: True state-vector representation with proper entanglement modeling
+-   **Real-Time State Visualization**: Human-readable circuit state with automatic probability calculations
+-   **Probabilistic Measurement**: Authentic quantum measurement with state collapse simulation
+
+### Advanced Visualization
+-   **Rich State Display**: Comprehensive output showing:
+    -   Individual qubit marginal probabilities
+    -   System-wide entanglement detection (`Entangled` or `Separable`)
+    -   Complete basis state probability distributions
+    -   Circuit execution tracking and validation
+
+### Quantum Algorithm Library
+-   **Bell State Generator**: Instant 2-qubit entanglement creation
+-   **GHZ State Constructor**: Multi-qubit entanglement for 3+ qubits
+-   **Quantum Fourier Transform (QFT)**: Full implementation with inverse operations
+-   **Grover's Search Algorithm**: Quadratic speedup for unstructured database search
+-   **Shor's Period-Finding**: Core subroutine for quantum factorization
+
+### Performance & Accuracy
+-   **Tensor Product Operations**: Industry-standard gate application using Kronecker products
+-   **Efficient State Management**: Optimized memory usage for large quantum systems
+-   **Numerical Precision**: High-precision complex arithmetic for stable simulations
+-   **Validation Suite**: Comprehensive test coverage ensuring algorithm correctness
 
 ## Installation
 
-```bash
-# It is recommended to use a virtual environment
-python -m venv venv
-# Windows: venv\Scripts\activate | MacOS/Linux: source venv/bin/activate
+### Prerequisites
+- Python 3.8 or higher
+- NumPy for numerical computations
+- Git for version control
 
+### Quick Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/0xReLogic/Chaos.git
+cd Chaos
+
+# Create and activate virtual environment (recommended)
+python -m venv venv
+
+# Windows
+venv\Scripts\activate
+
+# macOS/Linux
+source venv/bin/activate
+
+# Install dependencies
 pip install -r requirements.txt
+```
+
+### Verify Installation
+
+```python
+# Test the installation
+from quantum_circuit import QuantumCircuit, create_bell_state
+
+# Create a simple Bell state
+qc = create_bell_state()
+qc.run()
+print(qc)  # Should show entangled state output
+```
+
+## Quick Start
+
+Here's a 30-second introduction to CHAOS:
+
+```python
+from quantum_circuit import QuantumCircuit, create_bell_state
+
+# Method 1: Create a Bell state using the helper function
+bell = create_bell_state()
+bell.run()
+print("Bell State:")
+print(bell)
+
+# Method 2: Build a circuit manually
+qc = QuantumCircuit(2)
+qc.apply_gate('H', 0)    # Hadamard on qubit 0
+qc.apply_gate('CNOT', 0, 1)  # CNOT with 0 as control, 1 as target
+qc.run()
+print("\nManual Bell State:")
+print(qc)
+
+# Method 3: Measure a qubit and see state collapse
+result = qc.measure(0)
+print(f"\nMeasurement result: {result}")
+print("State after measurement:")
+print(qc)
+```
+
+**Expected Output:**
+```
+Bell State:
+Quantum Circuit (2 qubits, Entangled)
+=====================================
+Qubit 0: |0⟩=50.0%, |1⟩=50.0%
+Qubit 1: |0⟩=50.0%, |1⟩=50.0%
+-------------------------------------
+System State Probabilities:
+  |00⟩: 50.0%
+  |11⟩: 50.0%
 ```
 
 ## Usage Guide
@@ -464,6 +582,116 @@ Deduced period r = 4
 SUCCESS: 7^4 mod 15 = 1. Period found is correct.
 ```
 
+## API Reference
+
+### Core Classes
+
+#### `QuantumCircuit(num_qubits)`
+Main class for quantum circuit simulation.
+
+**Parameters:**
+- `num_qubits` (int): Number of qubits in the circuit
+
+**Key Methods:**
+```python
+# Gate Operations
+apply_gate(gate_name, *qubits)          # Apply single/multi-qubit gates
+apply_hadamard_to_all()                 # Apply H gate to all qubits
+apply_qft(qubits=None, swaps=True)      # Quantum Fourier Transform
+apply_iqft(qubits=None, swaps=True)     # Inverse QFT
+
+# Algorithm Operations
+apply_grover_iteration(marked_state)     # Single Grover iteration
+apply_modular_exponentiation(a, N, control_qubits, ancilla_qubits)
+
+# Circuit Control
+run()                                   # Execute all operations
+reset()                                 # Reset to |0⟩^n state
+measure(qubit_index)                    # Measure single qubit
+measure(qubit_indices)                  # Measure multiple qubits
+
+# State Information
+print(circuit)                         # Display circuit state
+circuit.state_vector                   # Access raw state vector
+circuit.is_entangled()                 # Check entanglement status
+```
+
+#### `Qubit` Class
+Individual qubit representation with state tracking.
+
+#### `QuantumGates` Module
+Contains all supported quantum gates:
+- **Single-qubit**: `H`, `X`, `Y`, `Z`, `S`, `T`, `R`
+- **Multi-qubit**: `CNOT`, `CZ`, `SWAP`, `Toffoli`
+- **Parameterized**: `RX(θ)`, `RY(θ)`, `RZ(θ)`
+
+### Helper Functions
+
+```python
+# State Generators
+create_bell_state()                     # |Φ+⟩ = (|00⟩ + |11⟩)/√2
+create_ghz_state(num_qubits)           # |GHZ_n⟩ = (|0...0⟩ + |1...1⟩)/√2
+
+# Utility Functions
+binary_to_state_index(binary_string)   # Convert binary string to state index
+state_index_to_binary(index, num_qubits)  # Convert state index to binary
+```
+
+## Testing
+
+CHAOS includes a comprehensive test suite to ensure algorithm correctness:
+
+### Running Tests
+
+```bash
+# Run specific algorithm tests
+python test_qft.py        # QFT implementation
+python test_grover.py     # Grover's algorithm
+python test_shor.py       # Shor's period-finding
+python test_ghz.py        # GHZ state verification
+python test_quantum_circuit.py  # Core functionality
+```
+
+### Test Coverage
+
+- **Bell State Creation**: Verifies proper entanglement
+- **GHZ State Generation**: Multi-qubit entanglement validation
+- **QFT Correctness**: QFT ∘ IQFT = Identity verification
+- **Grover's Algorithm**: Search success probability validation
+- **Shor's Period-Finding**: Period extraction accuracy
+- **Measurement Collapse**: State vector collapse verification
+- **Gate Operations**: All quantum gates functionality
+
+## Contributing
+
+We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
+
+### Development Setup
+
+```bash
+# Fork and clone the repository
+git clone https://github.com/0xReLogic/Chaos.git
+cd Chaos
+
+# Create development environment
+python -m venv dev-env
+source dev-env/bin/activate  # or dev-env\Scripts\activate on Windows
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Run tests to verify everything works
+python test_quantum_circuit.py
+```
+
+### Areas for Contribution
+
+- **Performance Optimization**: GPU acceleration, memory optimization
+- **New Algorithms**: Variational algorithms, error correction
+- **Visualization**: Circuit diagrams, state visualization
+- **Testing**: Edge cases, stress testing, benchmarks
+- **Documentation**: Tutorials, examples, API docs
+
 ## Future Roadmap
 
 CHAOS is feature-complete for its initial goals, but there is always room for growth. Future development will focus on two key areas:
@@ -476,8 +704,13 @@ CHAOS is feature-complete for its initial goals, but there is always room for gr
 - **Mission**: Make CHAOS more accessible and integrable with the wider quantum ecosystem.
 - **Goals**: Develop a more abstract API for circuit building, improve circuit visualization, and design a bridge to convert circuits from/to standard formats like Qiskit or Cirq.
 
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
 ---
 
 <p align="center">
-  Made with ❤️ 0xReLogic
+  <strong>Made with ❤️ by Allen Elzayn (0xReLogic)</strong><br>
+  <em>Bringing quantum computing to everyone, one qubit at a time</em>
 </p>
