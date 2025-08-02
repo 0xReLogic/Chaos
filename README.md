@@ -176,10 +176,8 @@ print("\nVerification successful: IQFT(QFT(|psi>)) == |psi>")
 **QFT Circuit Diagram (3 Qubits):**
 
 ```mermaid
-graph TD
-    direction LR
+graph LR
     subgraph QFT_Circuit ["Quantum Fourier Transform - 3 Qubits"]
-        direction TD
         %% Input states
         q0_in["|x0⟩"] --> H0[H] 
         q1_in["|x1⟩"] --> H1[H]
@@ -311,9 +309,7 @@ The crowning achievement of the CHAOS simulator is its ability to run the quantu
 
 ```mermaid
 graph LR
-    direction LR
     subgraph Shor_Circuit ["Shor's Algorithm - Period Finding Circuit"]
-        direction TD
         %% Control register initialization
         subgraph Control_Reg ["Control Register - 2n qubits"]
             c_init["|0⟩⊗2n"] --> H_all["H⊗2n<br/>(Superposition)"] --> c_super["|+⟩⊗2n"]
