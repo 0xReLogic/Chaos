@@ -68,11 +68,26 @@ Definisi "Menang": Lo bisa mengimplementasikan algoritma kuantum sederhana seper
 # - [x] Kembangkan sistem untuk melacak dan memvisualisasikan probabilitas dari state vector global yang kompleks.
 # - [x] Buat sirkuit ikonik untuk menghasilkan Bell State dan GHZ State untuk membuktikan mesin entanglement bekerja.
 
-# Fase 6: Ujian Akhir - Implementasi Algoritma Kompleks
+# Fase 6: [IN PROGRESS] Ujian Akhir - Implementasi Algoritma Kompleks
 # Misi: Membuktikan kekuatan simulator dengan menjalankan algoritma yang mustahil dilakukan dengan pendekatan lama.
 # Tantangan ini setara dengan pengujian multi-node dan mencapai konsensus yang stabil.
 #
-# - [ ] Implementasikan Quantum Fourier Transform (QFT) sebagai modul inti.
-# - [ ] Bangun sirkuit untuk menjalankan QFT pada 3 dan 4 qubit dan verifikasi hasilnya.
-# - [ ] (Stretch Goal) Implementasikan algoritma Grover untuk pencarian dalam database kecil (misal: 4 item, 2 qubit).
-# - [ ] (Ultimate Goal) Rancang kerangka untuk algoritma Shor, bahkan jika hanya untuk memfaktorkan angka yang sangat kecil seperti 15.
+# - [x] Implement Quantum Fourier Transform (QFT) and its inverse (IQFT) sebagai modul inti.
+# - [x] Bangun sirkuit untuk menjalankan QFT pada 3 dan 4 qubit dan verifikasi hasilnya.
+# - [x] (Stretch Goal) Implementasikan algoritma Grover untuk pencarian dalam database kecil (misal: 4 item, 2 qubit).
+# - [x] (Ultimate Goal) Implementasikan kerangka untuk algoritma Shor, dengan target awal untuk memfaktorkan 15.
+
+# Fase 7: [FUTURE] Optimisasi Kinerja & Simulasi Lanjutan
+# Misi: Meningkatkan kecepatan dan realisme simulator untuk menangani sirkuit yang lebih besar dan kompleks.
+#
+# - [ ] Profiling dan optimisasi: Identifikasi dan percepat bagian kode yang paling lambat (misal: ekspansi matriks).
+# - [ ] Pertimbangkan untuk menggunakan library seperti `cupy` untuk akselerasi GPU.
+# - [ ] (Stretch Goal) Implementasikan model noise dasar (misal: depolarizing channel) untuk simulasi yang lebih realistis.
+# - [ ] (Stretch Goal) Tambahkan dukungan untuk sirkuit parametrik.
+
+# Fase 8: [FUTURE] Usability & Integrasi
+# Misi: Membuat CHAOS lebih mudah diakses dan diintegrasikan dengan alat lain.
+#
+# - [ ] Kembangkan API yang lebih abstrak untuk membangun sirkuit (misal: `qc.add(H(0), CNOT(0,1))`).
+# - [ ] Buat visualisasi sirkuit interaktif yang lebih baik.
+# - [ ] (Ultimate Goal) Rancang jembatan untuk mengonversi sirkuit dari/ke format standar seperti Qiskit atau Cirq.
