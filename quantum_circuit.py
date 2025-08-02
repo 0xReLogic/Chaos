@@ -610,3 +610,57 @@ def create_ghz_state(num_qubits: int = 3) -> QuantumCircuit:
         circuit.apply_cnot(0, i)
 
     return circuit
+
+def create_deutsch_algorithm(f_type: str) -> QuantumCircuit:
+    """
+    Create a Deutsch algorithm circuit for a specified function type.
+    
+    The Deutsch algorithm determines whether a given function f is constant or balanced
+    using only one function evaluation, demonstrating quantum speedup.
+    
+    Args:
+        f_type: The type of function to test. Options are:
+            - "constant_0": f(x) = 0 for all x
+            - "constant_1": f(x) = 1 for all x  
+            - "identity": f(x) = x
+            - "negation": f(x) = NOT x
+    
+    Returns:
+        A quantum circuit configured to run Deutsch's algorithm
+        
+    Raises:
+        ValueError: If f_type is not one of the supported function types
+    """
+    if f_type not in ["constant_0", "constant_1", "identity", "negation"]:
+        raise ValueError(f"Unsupported function type: {f_type}")
+    
+    # Deutsch algorithm requires 2 qubits: input qubit and ancilla qubit
+    circuit = QuantumCircuit(2)
+    
+    # Step 1: Initialize ancilla qubit to |1⟩ 
+    circuit.apply_gate("X", 1)
+    
+    # Step 2: Apply Hadamard to both qubits
+    circuit.apply_gate("H", 0)  # Input qubit
+    circuit.apply_gate("H", 1)  # Ancilla qubit
+    
+    # Step 3: Apply the oracle for function f
+    if f_type == "constant_0":
+        # f(x) = 0: Do nothing (identity operation)
+        pass
+    elif f_type == "constant_1":
+        # f(x) = 1: Flip the ancilla qubit
+        circuit.apply_gate("X", 1)
+    elif f_type == "identity":
+        # f(x) = x: CNOT with input as control, ancilla as target
+        circuit.apply_cnot(0, 1)
+    elif f_type == "negation":
+        # f(x) = NOT x: X gate on input, then CNOT
+        circuit.apply_gate("X", 0)
+        circuit.apply_cnot(0, 1)
+        circuit.apply_gate("X", 0)  # Undo the X gate on input
+    
+    # Step 4: Apply Hadamard to input qubit
+    circuit.apply_gate("H", 0)
+    
+    return circuit
