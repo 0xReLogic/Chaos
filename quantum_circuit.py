@@ -4,6 +4,7 @@ Module: quantum_circuit.py
 Description: Implementation of Quantum Circuits for managing multiple qubits and operations
 """
 
+import random
 import numpy as np
 from typing import Union, List, Dict, Tuple, Optional, Any
 from qubit import Qubit
@@ -211,7 +212,38 @@ class QuantumCircuit:
             IndexError: If the qubit index is out of range
         """
         if qubit_index is not None:
-            raise NotImplementedError("Partial measurement is not yet implemented in Phase 4. Use measure() to measure all qubits.")
+            if not (0 <= qubit_index < self.num_qubits):
+                raise IndexError(f"Qubit index {qubit_index} out of range for {self.num_qubits} qubits.")
+
+            # 1. Calculate the probability of measuring 0 for the specified qubit
+            prob_zero = 0
+            # The bit to check corresponds to the qubit's position from the left in binary representation (e.g., q2, q1, q0)
+            bit_position_mask = 1 << (self.num_qubits - 1 - qubit_index)
+
+            for i, amp in enumerate(self.state_vector):
+                # If the bit at the qubit's position is 0, add its probability to prob_zero
+                if (i & bit_position_mask) == 0:
+                    prob_zero += np.abs(amp)**2
+
+            # 2. Choose the measurement outcome based on the calculated probability
+            measured_value = 0 if random.random() < prob_zero else 1
+
+            # 3. Collapse the state vector
+            new_state_vector = np.zeros_like(self.state_vector)
+            for i, amp in enumerate(self.state_vector):
+                # Check if the bit at the qubit's position matches the measured value
+                is_match = ((i & bit_position_mask) != 0) == measured_value
+                if is_match:
+                    new_state_vector[i] = amp
+            
+            # 4. Normalize the new state vector
+            norm = np.linalg.norm(new_state_vector)
+            if norm == 0:
+                # This case should ideally not be reached in a valid quantum state
+                raise ValueError("Cannot collapse to a zero-norm state.")
+            self.state_vector = new_state_vector / norm
+
+            return measured_value
 
         # Calculate probabilities for each state in the state vector
         probabilities = np.abs(self.state_vector)**2
@@ -244,27 +276,106 @@ class QuantumCircuit:
         """
         self.run()
         return self.measure(qubit_index)
-    
+
     def __str__(self) -> str:
-        """
-        String representation of the quantum circuit.
+        """Provides a rich, intuitive string representation of the quantum circuit's state."""
+        # 1. Calculate marginal probabilities for each qubit
+        marginal_probs = []
+        for i in range(self.num_qubits):
+            prob_zero = 0
+            mask = 1 << (self.num_qubits - 1 - i)
+            for j, amp in enumerate(self.state_vector):
+                if (j & mask) == 0:
+                    prob_zero += np.abs(amp)**2
+            marginal_probs.append(prob_zero)
+
+        # 2. Check for entanglement
+        # Heuristic: If the probability of any basis state is not equal to the product of its marginals, it's entangled.
+        is_entangled = False
+        system_probabilities = np.abs(self.state_vector)**2
+        if self.num_qubits > 1:
+            for i, prob in enumerate(system_probabilities):
+                if prob > 1e-9:
+                    product_of_marginals = 1.0
+                    for q_idx in range(self.num_qubits):
+                        # Get the bit value (0 or 1) for this qubit in this basis state
+                        bit_val = (i >> (self.num_qubits - 1 - q_idx)) & 1
+                        if bit_val == 0:
+                            product_of_marginals *= marginal_probs[q_idx]
+                        else:
+                            product_of_marginals *= (1 - marginal_probs[q_idx])
+                    
+                    if not np.isclose(prob, product_of_marginals):
+                        is_entangled = True
+                        break
+
+        # 3. Build the output string
+        status = "Entangled" if is_entangled else "Separable"
+        header = f"Quantum Circuit ({self.num_qubits} qubits, {status})"
+        output = f"{header}\n{'=' * len(header)}\n"
+
+        for i in range(self.num_qubits):
+            prob0 = marginal_probs[i]
+            prob1 = 1 - prob0
+            output += f"Qubit {i}: |0⟩={prob0:.1%}, |1⟩={prob1:.1%}\n"
         
-        Returns:
-            A string showing the state of each qubit in the circuit
-        """
-        result = f"Quantum Circuit with {self.num_qubits} qubits:\n"
-        result += f"State Vector: {self.state_vector}\n\n"
-        result += "State Probabilities:\n"
+        output += "-" * len(header) + "\n"
+        output += "System State Probabilities:\n"
+
+        for i, prob in enumerate(system_probabilities):
+            if prob > 1e-9:
+                basis_state = format(i, f'0{self.num_qubits}b')
+                output += f"  |{basis_state}⟩: {prob:.1%}\n"
         
-        probabilities = np.abs(self.state_vector)**2
-        for i, prob in enumerate(probabilities):
-            if prob > 1e-9: # Only show states with non-negligible probability
-                # Format state as a binary string, e.g., |01⟩ for index 1 in a 2-qubit system
-                state_str = format(i, f'0{self.num_qubits}b')
-                result += f"|{state_str}⟩: {prob:.4f}\n"
-        return result
+        return output
+    
 
 
+
+
+def run_and_measure(self, qubit_index: Optional[int] = None) -> Union[int, List[int]]:
+    """
+    Run the circuit and then measure one or all qubits.
+    
+    This is a convenience method that combines run() and measure().
+    
+    Args:
+        qubit_index: The index of the qubit to measure, or None to measure all qubits
+        
+    Returns:
+        If qubit_index is specified, returns the measurement result (0 or 1) for that qubit.
+        If qubit_index is None, returns a list of measurement results for all qubits.
+    """
+    self.run()
+    return self.measure(qubit_index)
+
+def __str__(self) -> str:
+    """
+    String representation of the quantum circuit.
+    
+    Provides a rich, intuitive string representation of the quantum circuit's state.
+    """
+    # 1. Calculate marginal probabilities for each qubit
+    marginal_probs = []
+    for i in range(self.num_qubits):
+        prob_zero = 0
+        mask = 1 << (self.num_qubits - 1 - i)
+        for j, amp in enumerate(self.state_vector):
+            if (j & mask) == 0:
+                prob_zero += np.abs(amp)**2
+        marginal_probs.append(prob_zero)
+
+    # 2. Check for entanglement
+    # Heuristic: If the probability of any basis state is not equal to the product of its marginals, it's entangled.
+    is_entangled = False
+    system_probabilities = np.abs(self.state_vector)**2
+    if self.num_qubits > 1:
+        for i, prob in enumerate(system_probabilities):
+            if prob > 1e-9:
+                product_of_marginals = 1.0
+                for q_idx in range(self.num_qubits):
+                    # Get the bit value (0 or 1) for this qubit in this basis state
+                    bit_val = (i >> (self.num_qubits - 1 - q_idx)) & 1
 # Predefined quantum algorithms
 
 def create_bell_state() -> QuantumCircuit:
@@ -280,4 +391,31 @@ def create_bell_state() -> QuantumCircuit:
     circuit = QuantumCircuit(2)
     circuit.apply_gate("H", 0)  # Apply Hadamard to first qubit
     circuit.apply_cnot(0, 1)    # Apply CNOT with first qubit as control, second as target
+    return circuit
+
+def create_ghz_state(num_qubits: int = 3) -> QuantumCircuit:
+    """
+    Create a GHZ (Greenberger-Horne-Zeilinger) state circuit for n qubits.
+
+    The GHZ state is a maximally entangled state of three or more qubits.
+    It's created by applying a Hadamard to the first qubit, then a series of
+    CNOTs from the first qubit to all other qubits.
+
+    Args:
+        num_qubits: The number of qubits for the GHZ state (must be >= 2).
+
+    Returns:
+        A quantum circuit configured to create a GHZ state.
+    """
+    if num_qubits < 2:
+        raise ValueError("GHZ state requires at least 2 qubits.")
+
+    circuit = QuantumCircuit(num_qubits)
+    # Start with a Hadamard on the first qubit
+    circuit.apply_gate('H', 0)
+
+    # Cascade CNOTs from the first qubit to all others
+    for i in range(1, num_qubits):
+        circuit.apply_cnot(0, i)
+
     return circuit

@@ -1,163 +1,101 @@
-# CHAOS - Quantum Computing Simulator
+# CHAOS - A Physics-Accurate Quantum Computing Simulator
 
-CHAOS is a quantum computing simulator implemented in Python. This project aims to simulate the behavior of quantum computers on classical computers.
+CHAOS is a multi-qubit quantum computing simulator built in Python. It is designed from the ground up to be physically accurate, modeling quantum phenomena like superposition and entanglement through a professional, state-vector-based architecture.
 
-## Concept
+## Vision & Philosophy
 
-In Greek mythology, Chaos is the primordial void from which everything is born. Similarly, quantum computers operate in the realm of probability and superposition before "collapsing" into a definite answer.
+In Greek mythology, **Chaos** is the primordial void from which the cosmos was born. This project embodies that spirit: it provides a foundational framework to simulate the probabilistic, indeterminate nature of quantum mechanics, from which definite, classical answers emerge upon measurement.
 
-The core of CHAOS is built around a powerful, modern architecture:
+Unlike simpler simulators that manage qubits individually, CHAOS adopts the industry-standard approach used in professional and academic research, ensuring that its behavior correctly reflects the underlying mathematics of quantum mechanics.
 
--   **Global State Vector**: Instead of managing individual qubits, the `QuantumCircuit` now operates on a single, global state vector of size 2^n (where n is the number of qubits). This is the standard, professional approach for quantum simulation, allowing for the accurate representation of complex, system-wide states like entanglement.
--   **Tensor Product Operations**: All quantum gates, including single-qubit and controlled gates, are applied to the state vector using their full matrix representation expanded via tensor products. This ensures that the simulation is mathematically and physically accurate.
--   **True Entanglement**: The simulator now correctly models entanglement without shortcuts. Applying a CNOT gate to a superposition correctly generates a Bell state, where the fates of the qubits are intertwined, as demonstrated by the final state probabilities.
+## Core Architectural Pillars
 
-## Features
+The simulator's accuracy and power rest on three fundamental pillars:
 
-This project builds a Python library that can:
+1.  **Global State Vector**: The entire multi-qubit system is represented by a single, unified state vector of size 2^n (where n is the number of qubits). This is the only way to correctly capture system-wide correlations and entanglement.
+2.  **Tensor Product Gate Application**: Quantum gates are not applied to qubits in isolation. Instead, they are expanded into full-system operators using the tensor product (Kronecker product). For example, applying a Hadamard gate to the first of three qubits involves creating an `H ⊗ I ⊗ I` operator, which then acts on the entire state vector. This is computationally intensive but physically correct.
+3.  **Probabilistic Measurement & State Collapse**: Measurement is a probabilistic process based on the amplitudes of the state vector. When a qubit is measured, the system's state vector collapses into a new, valid state consistent with the measurement outcome, accurately modeling quantum mechanics.
 
-1. Define Qubits, the basic units of quantum computation that can exist in state 0, 1, or both simultaneously (superposition).
-2. Implement Quantum Gates, operations (such as rotations or flips) that manipulate the state of Qubits.
-3. Simulate Quantum Entanglement, the "spooky" phenomenon where two Qubits become mysteriously connected.
-4. Run Quantum Circuits (sequences of gates) and "measure" the results to get probabilistic answers.
+## Key Features
+
+-   **Stateful, Multi-Qubit Circuits**: Create circuits with any number of qubits.
+-   **Rich State Visualization**: A human-readable `print()` output for any circuit, automatically calculating and displaying:
+    -   Marginal probabilities for each qubit.
+    -   An entanglement status (`Entangled` or `Separable`).
+    -   Full system state probabilities.
+-   **Accurate Partial Measurement**: Measure a single qubit and watch the entire system state collapse correctly.
+-   **Iconic State Generators**: Built-in functions to instantly create famous entangled states like the Bell State and GHZ State.
 
 ## Installation
 
-This project uses Python and NumPy. To install dependencies:
-
 ```bash
-# Create virtual environment
+# It is recommended to use a virtual environment
 python -m venv venv
+# Windows: venv\Scripts\activate | MacOS/Linux: source venv/bin/activate
 
-# Activate virtual environment
-# On Windows:
-venv\Scripts\activate
-# On Unix/MacOS:
-source venv/bin/activate
-
-# Install dependencies
-pip install numpy
-```
-
-## Usage
-
-Here's how to use CHAOS to simulate a simple quantum circuit.
-
-### 1. Installing Dependencies
-
-Make sure you have the required packages installed:
-
-```bash
 pip install -r requirements.txt
 ```
 
-### 2. Creating an Entangled Bell State
+## Usage Guide
 
-The new architecture makes creating and observing complex quantum states straightforward. Here's how to create a Bell State, a classic example of maximum entanglement:
+### Example 1: Creating a Bell State (2-Qubit Entanglement)
+
+The Bell State is the simplest and most famous example of entanglement.
 
 ```python
 from quantum_circuit import create_bell_state
 
-# create_bell_state is a helper function that builds the circuit
-# It applies a Hadamard gate to qubit 0, and a CNOT with control=0, target=1
+# This helper function creates a 2-qubit circuit,
+# applies H to the first qubit, then CNOT(0, 1).
 bell_circuit = create_bell_state()
-
-# Run the simulation to apply the gates
 bell_circuit.run()
 
-# Print the final state vector and probabilities
-# The output will show ~50% probability for |00> and ~50% for |11>
 print(bell_circuit)
-
-# Measure the system
-# This will collapse the state to either [0, 0] or [1, 1]
-results = bell_circuit.measure()
-print(f"Measurement results: {results}")
 ```
 
-### Quantum Gates
+**Expected Output:**
+```
+Quantum Circuit (2 qubits, Entangled)
+=====================================
+Qubit 0: |0⟩=50.0%, |1⟩=50.0%
+Qubit 1: |0⟩=50.0%, |1⟩=50.0%
+-------------------------------------
+System State Probabilities:
+  |00⟩: 50.0%
+  |11⟩: 50.0%
+```
+This output correctly shows that the system is entangled and will only ever be measured as `00` or `11`.
+
+### Example 2: Creating a GHZ State (Multi-Qubit Entanglement)
+
+The Greenberger–Horne–Zeilinger (GHZ) state extends entanglement to three or more qubits.
 
 ```python
-from qubit import Qubit
-from quantum_gates import apply_gate
+from quantum_circuit import create_ghz_state
 
-# Create a qubit in state |0⟩
-q = Qubit(0)
+ghz_circuit = create_ghz_state(3)
+ghz_circuit.run()
 
-# Apply X gate (NOT gate) - flips |0⟩ to |1⟩
-apply_gate(q, "X")
-print(q)  # Should show state |1⟩
-
-# Create a new qubit in state |0⟩
-q = Qubit(0)
-
-# Apply Hadamard gate to create superposition
-apply_gate(q, "H")
-print(q)  # Should show 50% |0⟩, 50% |1⟩
-
-# Available gates:
-# - "X": Pauli-X (NOT) gate
-# - "Y": Pauli-Y gate
-# - "Z": Pauli-Z (phase flip) gate
-# - "H": Hadamard gate
-# - "S": S gate (phase gate)
-# - "T": T gate
-# - "I": Identity gate
-
-# Quantum coin flip example
-q = Qubit(0)
-apply_gate(q, "H")
-result = q.measure()
-print(f"Coin flip result: {'Heads' if result == 0 else 'Tails'}")
+print(ghz_circuit)
 ```
 
-### Quantum Circuits
-
-```python
-from quantum_circuit import QuantumCircuit, create_bell_state, create_deutsch_algorithm
-
-# Create a circuit with 3 qubits
-circuit = QuantumCircuit(3)
-
-# Apply gates to specific qubits
-circuit.apply_gate("X", 0)  # Apply X gate to qubit 0
-circuit.apply_gate("H", 1)  # Apply H gate to qubit 1
-circuit.apply_cnot(0, 2)    # Apply CNOT with qubit 0 as control, qubit 2 as target
-
-# Run the circuit to execute all gates
-circuit.run()
-
-# Measure all qubits
-results = circuit.measure()
-print(f"Measurement results: {results}")
-
-# Create a Bell state (entangled qubits)
-bell_circuit = create_bell_state()
-bell_circuit.run()
-bell_results = bell_circuit.measure()
-print(f"Bell state measurement: {bell_results}")  # Should be either [0,0] or [1,1]
-
-# Run Deutsch's Algorithm to determine if a function is constant or balanced
-deutsch_circuit = create_deutsch_algorithm("constant_0")  # f(x) = 0 for all x
-deutsch_circuit.run()
-result = deutsch_circuit.measure(0)  # Measure only the first qubit
-print(f"Function is {'constant' if result == 0 else 'balanced'}")
+**Expected Output:**
 ```
+Quantum Circuit (3 qubits, Entangled)
+=====================================
+Qubit 0: |0⟩=50.0%, |1⟩=50.0%
+Qubit 1: |0⟩=50.0%, |1⟩=50.0%
+Qubit 2: |0⟩=50.0%, |1⟩=50.0%
+-------------------------------------
+System State Probabilities:
+  |000⟩: 50.0%
+  |111⟩: 50.0%
+```
+This shows that all three qubits are linked; they will all be `0` or all be `1` upon measurement.
 
-## Development
+## Project Roadmap
 
-This project is developed in several phases:
-
-### Phase 1: Quantum Particle (The Qubit)
-- [x] Milestone 1.1: Create a Qubit class in Python. Internally, represent its state as a 2D vector with complex numbers (using NumPy).
-- [x] Milestone 1.2: Implement functions to initialize a Qubit to state |0⟩ or |1⟩.
-- [x] Milestone 1.3: Implement a measure() function that will "collapse" the Qubit's superposition to 0 or 1 based on its amplitude probabilities.
-
-### Phase 2: Laws of Physics (The Quantum Gates)
-- [x] Milestone 2.1: Represent each quantum gate (Pauli-X, Hadamard, CNOT) as 2x2 or 4x4 matrices.
-- [x] Milestone 2.2: Create an apply_gate(qubit, gate) function that performs matrix multiplication to transform the Qubit state.
-
-### Phase 3: Mini Universe (The Quantum Circuit)
-- [x] Milestone 3.1: Create a QuantumCircuit class that can manage multiple Qubits (a quantum register).
-- [x] Milestone 3.2: Implement methods to add a series of gates to the circuit.
-- [x] Milestone 3.3: Create a run() function that will execute all gates sequentially in the circuit and return the final measurement results.
+-   **Phase 1-3 (Complete):** Foundational implementation of qubits, gates, and basic circuits.
+-   **Phase 4 (Complete):** The Great Refactor to a global state vector architecture.
+-   **Phase 5 (Complete):** Implementation of partial measurement and rich state visualization.
+-   **Phase 6 (Next):** Implementation of complex quantum algorithms like the Quantum Fourier Transform (QFT) and Grover's search algorithm.

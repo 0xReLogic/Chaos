@@ -57,16 +57,16 @@ Definisi "Menang": Lo bisa mengimplementasikan algoritma kuantum sederhana seper
 # - [x] Refactor total kelas QuantumCircuit untuk mengelola state vector global ini.
 # - [x] Tulis ulang `apply_gate` untuk beroperasi pada state vector dengan matriks yang diperluas (misal: H di qubit kedua dari 3 qubit).
 # - [x] Tulis ulang `apply_controlled_gate` untuk menjadi operasi matriks 4x4 (atau lebih besar) sejati pada state vector, tanpa "jalan pintas" pengukuran.
-# - [x] Buat sistem pengujian untuk memvalidasi operasi gerbang pada state vector 2, 3, dan 4-qubit.
+# - [x] Buat sistem pengujian yang membuktikan bahwa pengukuran parsial pada Bell State meruntuhkan sistem ke keadaan basis yang benar.
 
 # Fase 5: Mesin Ekonomi Kuantum - Pengukuran Parsial & Entanglement Sejati
 # Misi: Mengimplementasikan mekanika kuantum yang paling aneh dan kuat secara akurat.
 # Tantangan ini setara dengan membangun model ekonomi dan state yang kompleks.
 #
-# - [ ] Implementasikan `measure_partial(qubit_index)` yang meruntuhkan satu qubit tanpa menghancurkan seluruh sistem yang terjerat.
-# - [ ] Verifikasi bahwa entanglement (misal: Bell State) tetap terjaga setelah pengukuran parsial pada qubit lain yang tidak terjerat.
-# - [ ] Kembangkan sistem untuk melacak dan memvisualisasikan probabilitas dari state vector global yang kompleks.
-# - [ ] Buat sirkuit ikonik untuk menghasilkan Bell State dan GHZ State untuk membuktikan mesin entanglement bekerja.
+# - [x] Implementasikan `measure_partial(qubit_index)` untuk mengukur satu qubit saja dan meruntuhkan state vector secara akurat.
+# - [x] Verifikasi bahwa entanglement (misal: Bell State) tetap terjaga setelah pengukuran parsial pada qubit lain yang tidak terjerat.
+# - [x] Kembangkan sistem untuk melacak dan memvisualisasikan probabilitas dari state vector global yang kompleks.
+# - [x] Buat sirkuit ikonik untuk menghasilkan Bell State dan GHZ State untuk membuktikan mesin entanglement bekerja.
 
 # Fase 6: Ujian Akhir - Implementasi Algoritma Kompleks
 # Misi: Membuktikan kekuatan simulator dengan menjalankan algoritma yang mustahil dilakukan dengan pendekatan lama.
