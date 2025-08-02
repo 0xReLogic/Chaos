@@ -163,15 +163,15 @@ def apply_hadamard_direct(state_vector, qubit_index, total_qubits):
 Our breakthrough achievements in quantum simulation are demonstrated through comprehensive performance analysis:
 
 #### Technical Comparison Analysis
-![Technical Performance Comparison](https://i.imgur.com/GZ6XrNi.png)
+![Technical Performance Comparison](https://files.catbox.moe/2fy3om.png)
 *Comprehensive comparison showing the revolutionary 1,000,000x memory efficiency breakthrough achieved through direct state vector manipulation versus traditional matrix-based approaches.*
 
 #### Scalability Performance Analysis  
-![Performance Scaling Analysis](https://i.imgur.com/ZnHoRJa.png)
+![Performance Scaling Analysis](https://files.catbox.moe/1n7imw.png)
 *Detailed scaling analysis demonstrating successful 16-20 qubit simulation capabilities with memory usage remaining constant at 24MB, proving our architecture's practical viability for large-scale quantum computing.*
 
 #### Google Colab Achievement Demonstration
-![Google Colab Testing Results](https://i.imgur.com/xVOPvKp.png)
+![Google Colab Testing Results](https://files.catbox.moe/3v1j0k.png)
 *Real-world validation showing successful 20-qubit quantum simulation on Google Colab's NVIDIA T4 GPU (14.7GB), proving accessibility and practical deployment of advanced quantum algorithms.*
 
 **Key Performance Insights:**
