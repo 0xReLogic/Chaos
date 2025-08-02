@@ -177,7 +177,7 @@ print("\nVerification successful: IQFT(QFT(|psi>)) == |psi>")
 
 ```mermaid
 graph LR
-    subgraph QFT_Circuit ["Quantum Fourier ]
+    subgraph QFT_Circuit ["Quantum Fourier"]
         %% Input states
         q0_in["|x0⟩"] --> H0[H] 
         q1_in["|x1⟩"] --> H1[H]
