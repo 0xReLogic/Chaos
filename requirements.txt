@@ -1,1 +1,6 @@
+# Core dependencies
 numpy==1.26.4
+
+# Optional GPU acceleration (install with: pip install cupy-cuda11x or cupy-cuda12x)
+# cupy-cuda12x>=12.0.0  # For CUDA 12.x
+# cupy-cuda11x>=11.0.0  # For CUDA 11.x

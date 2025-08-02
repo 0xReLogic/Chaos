@@ -10,6 +10,18 @@ from typing import Union, List, Dict, Tuple, Optional, Any
 from qubit import Qubit
 from quantum_gates import QuantumGate, I_GATE, SINGLE_QUBIT_GATES, apply_gate
 
+# Optional GPU acceleration with CuPy
+try:
+    import cupy as cp
+    GPU_AVAILABLE = True
+    print("CHAOS: GPU acceleration enabled with CuPy")
+    array_lib = cp
+except ImportError:
+    GPU_AVAILABLE = False
+    cp = np  # Fallback to NumPy
+    array_lib = np
+    print("CHAOS: GPU not available, using CPU with NumPy")
+
 class QuantumCircuit:
     """
     Represents a quantum circuit with multiple qubits and gates.
@@ -30,7 +42,8 @@ class QuantumCircuit:
         
         self.num_qubits = num_qubits
         # Initialize all qubits to |0⟩ state
-        self.state_vector = np.zeros(2**num_qubits, dtype=complex)
+        # Initialize state vector with GPU support if available
+        self.state_vector = array_lib.zeros(2**num_qubits, dtype=complex)
         self.state_vector[0] = 1
         # List to store operations (gates and their target qubits)
         self.operations = []
@@ -258,9 +271,22 @@ class QuantumCircuit:
     
     def reset(self) -> None:
         """Reset all qubits to |0⟩ state and clear all operations."""
-        self.state_vector = np.zeros(2**self.num_qubits, dtype=complex)
+        # Reset state vector with GPU support if available
+        self.state_vector = array_lib.zeros(2**self.num_qubits, dtype=complex)
         self.state_vector[0] = 1
         self.operations = []
+    
+    def _to_cpu(self, array):
+        """Convert GPU array to CPU array if needed."""
+        if GPU_AVAILABLE and hasattr(array, 'get'):
+            return array.get()  # CuPy to NumPy
+        return array
+    
+    def _to_gpu(self, array):
+        """Convert CPU array to GPU array if available."""
+        if GPU_AVAILABLE and array_lib == cp:
+            return cp.asarray(array)
+        return array
     
     def _execute_single_gate(self, gate: Union[str, QuantumGate], qubit_index: int) -> None:
         """
@@ -437,8 +463,9 @@ class QuantumCircuit:
         Returns:
             An int for a single qubit measurement, or a list of ints for multiple.
         """
-        # Perform a full system measurement once
-        probabilities = np.abs(self.state_vector)**2
+        # Perform a full system measurement once - convert to CPU for NumPy operations
+        state_cpu = self._to_cpu(self.state_vector)
+        probabilities = np.abs(state_cpu)**2
         # Ensure probabilities sum to 1 to avoid numpy errors with floating point inaccuracies
         probabilities /= np.sum(probabilities)
         basis_states = np.arange(2**self.num_qubits)
