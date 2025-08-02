@@ -96,6 +96,39 @@ result = q.measure()
 print(f"Coin flip result: {'Heads' if result == 0 else 'Tails'}")
 ```
 
+### Quantum Circuits
+
+```python
+from quantum_circuit import QuantumCircuit, create_bell_state, create_deutsch_algorithm
+
+# Create a circuit with 3 qubits
+circuit = QuantumCircuit(3)
+
+# Apply gates to specific qubits
+circuit.apply_gate("X", 0)  # Apply X gate to qubit 0
+circuit.apply_gate("H", 1)  # Apply H gate to qubit 1
+circuit.apply_cnot(0, 2)    # Apply CNOT with qubit 0 as control, qubit 2 as target
+
+# Run the circuit to execute all gates
+circuit.run()
+
+# Measure all qubits
+results = circuit.measure()
+print(f"Measurement results: {results}")
+
+# Create a Bell state (entangled qubits)
+bell_circuit = create_bell_state()
+bell_circuit.run()
+bell_results = bell_circuit.measure()
+print(f"Bell state measurement: {bell_results}")  # Should be either [0,0] or [1,1]
+
+# Run Deutsch's Algorithm to determine if a function is constant or balanced
+deutsch_circuit = create_deutsch_algorithm("constant_0")  # f(x) = 0 for all x
+deutsch_circuit.run()
+result = deutsch_circuit.measure(0)  # Measure only the first qubit
+print(f"Function is {'constant' if result == 0 else 'balanced'}")
+```
+
 ## Development
 
 This project is developed in several phases:
@@ -110,6 +143,6 @@ This project is developed in several phases:
 - [x] Milestone 2.2: Create an apply_gate(qubit, gate) function that performs matrix multiplication to transform the Qubit state.
 
 ### Phase 3: Mini Universe (The Quantum Circuit)
-- [ ] Milestone 3.1: Create a QuantumCircuit class that can manage multiple Qubits (a quantum register).
-- [ ] Milestone 3.2: Implement methods to add a series of gates to the circuit.
-- [ ] Milestone 3.3: Create a run() function that will execute all gates sequentially in the circuit and return the final measurement results.
+- [x] Milestone 3.1: Create a QuantumCircuit class that can manage multiple Qubits (a quantum register).
+- [x] Milestone 3.2: Implement methods to add a series of gates to the circuit.
+- [x] Milestone 3.3: Create a run() function that will execute all gates sequentially in the circuit and return the final measurement results.

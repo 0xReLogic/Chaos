@@ -37,11 +37,11 @@ FASE 2: Hukum Fisika (The Quantum Gates)
 Definisi "Menang": Lo bisa mengambil Qubit di keadaan |0⟩, menerapkan gerbang Hadamard, lalu mengukurnya berulang kali dan mendapatkan hasil yang 50% 0 dan 50% 1. Lo sudah berhasil menciptakan probabilitas kuantum.
 
 FASE 3: Alam Semesta Mini (The Quantum Circuit)
-[ ] Milestone 3.1: Buat class QuantumCircuit yang bisa mengelola banyak Qubit (sebuah quantum register).
+[x] Milestone 3.1: Buat class QuantumCircuit yang bisa mengelola banyak Qubit (sebuah quantum register).
 
-[ ] Milestone 3.2: Implementasikan metode untuk menambah serangkaian gerbang ke dalam sirkuit.
+[x] Milestone 3.2: Implementasikan metode untuk menambah serangkaian gerbang ke dalam sirkuit.
 
-[ ] Milestone 3.3: Buat fungsi run() yang akan mengeksekusi semua gerbang secara berurutan di dalam sirkuit dan mengembalikan hasil pengukuran akhir.
+[x] Milestone 3.3: Buat fungsi run() yang akan mengeksekusi semua gerbang secara berurutan di dalam sirkuit dan mengembalikan hasil pengukuran akhir.
 
 Definisi "Menang": Lo bisa mengimplementasikan algoritma kuantum sederhana seperti Bell State (menciptakan entanglement) atau Deutsch's Algorithm.
 
