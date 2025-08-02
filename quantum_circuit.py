@@ -530,53 +530,43 @@ class QuantumCircuit:
         
         return output
     
-
-
-
-
-def run_and_measure(self, qubit_index: Optional[int] = None) -> Union[int, List[int]]:
-    """
-    Run the circuit and then measure one or all qubits.
-    
-    This is a convenience method that combines run() and measure().
-    
-    Args:
-        qubit_index: The index of the qubit to measure, or None to measure all qubits
+    def is_entangled(self) -> bool:
+        """
+        Check if the quantum system is in an entangled state.
         
-    Returns:
-        If qubit_index is specified, returns the measurement result (0 or 1) for that qubit.
-        If qubit_index is None, returns a list of measurement results for all qubits.
-    """
-    self.run()
-    return self.measure(qubit_index)
+        Returns:
+            bool: True if the system is entangled, False otherwise.
+        """
+        if self.num_qubits <= 1:
+            return False
+        
+        # Calculate marginal probabilities for each qubit
+        marginal_probs = []
+        for i in range(self.num_qubits):
+            prob_zero = 0
+            mask = 1 << (self.num_qubits - 1 - i)
+            for j, amp in enumerate(self.state_vector):
+                if (j & mask) == 0:
+                    prob_zero += np.abs(amp)**2
+            marginal_probs.append(prob_zero)
 
-def __str__(self) -> str:
-    """
-    String representation of the quantum circuit.
-    
-    Provides a rich, intuitive string representation of the quantum circuit's state.
-    """
-    # 1. Calculate marginal probabilities for each qubit
-    marginal_probs = []
-    for i in range(self.num_qubits):
-        prob_zero = 0
-        mask = 1 << (self.num_qubits - 1 - i)
-        for j, amp in enumerate(self.state_vector):
-            if (j & mask) == 0:
-                prob_zero += np.abs(amp)**2
-        marginal_probs.append(prob_zero)
-
-    # 2. Check for entanglement
-    # Heuristic: If the probability of any basis state is not equal to the product of its marginals, it's entangled.
-    is_entangled = False
-    system_probabilities = np.abs(self.state_vector)**2
-    if self.num_qubits > 1:
+        # Check for entanglement
+        system_probabilities = np.abs(self.state_vector)**2
         for i, prob in enumerate(system_probabilities):
             if prob > 1e-9:
                 product_of_marginals = 1.0
                 for q_idx in range(self.num_qubits):
-                    # Get the bit value (0 or 1) for this qubit in this basis state
                     bit_val = (i >> (self.num_qubits - 1 - q_idx)) & 1
+                    if bit_val == 0:
+                        product_of_marginals *= marginal_probs[q_idx]
+                    else:
+                        product_of_marginals *= (1 - marginal_probs[q_idx])
+                
+                if not np.isclose(prob, product_of_marginals):
+                    return True
+        return False
+
+
 # Predefined quantum algorithms
 
 def create_bell_state() -> QuantumCircuit:
