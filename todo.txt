@@ -45,3 +45,34 @@ FASE 3: Alam Semesta Mini (The Quantum Circuit)
 
 Definisi "Menang": Lo bisa mengimplementasikan algoritma kuantum sederhana seperti Bell State (menciptakan entanglement) atau Deutsch's Algorithm.
 
+# ======================================================
+# CHAOS EVOLUTION: THE PATH TO A WORLD-CLASS SIMULATOR
+# ======================================================
+
+# Fase 4: [SELESAI] Operasi Jantung - State Vector Global (The Great Refactor)
+# Misi: Mengubah CHAOS dari kalkulator kuantum menjadi simulator multi-qubit stateful yang akurat secara fisika.
+# Tantangan ini setara dengan evolusi arsitektur fundamental di proyek blockchain.
+#
+# - [x] Buang pendekatan per-qubit, implementasikan satu state vector global (2^n) menggunakan Tensor Product.
+# - [x] Refactor total kelas QuantumCircuit untuk mengelola state vector global ini.
+# - [x] Tulis ulang `apply_gate` untuk beroperasi pada state vector dengan matriks yang diperluas (misal: H di qubit kedua dari 3 qubit).
+# - [x] Tulis ulang `apply_controlled_gate` untuk menjadi operasi matriks 4x4 (atau lebih besar) sejati pada state vector, tanpa "jalan pintas" pengukuran.
+# - [x] Buat sistem pengujian untuk memvalidasi operasi gerbang pada state vector 2, 3, dan 4-qubit.
+
+# Fase 5: Mesin Ekonomi Kuantum - Pengukuran Parsial & Entanglement Sejati
+# Misi: Mengimplementasikan mekanika kuantum yang paling aneh dan kuat secara akurat.
+# Tantangan ini setara dengan membangun model ekonomi dan state yang kompleks.
+#
+# - [ ] Implementasikan `measure_partial(qubit_index)` yang meruntuhkan satu qubit tanpa menghancurkan seluruh sistem yang terjerat.
+# - [ ] Verifikasi bahwa entanglement (misal: Bell State) tetap terjaga setelah pengukuran parsial pada qubit lain yang tidak terjerat.
+# - [ ] Kembangkan sistem untuk melacak dan memvisualisasikan probabilitas dari state vector global yang kompleks.
+# - [ ] Buat sirkuit ikonik untuk menghasilkan Bell State dan GHZ State untuk membuktikan mesin entanglement bekerja.
+
+# Fase 6: Ujian Akhir - Implementasi Algoritma Kompleks
+# Misi: Membuktikan kekuatan simulator dengan menjalankan algoritma yang mustahil dilakukan dengan pendekatan lama.
+# Tantangan ini setara dengan pengujian multi-node dan mencapai konsensus yang stabil.
+#
+# - [ ] Implementasikan Quantum Fourier Transform (QFT) sebagai modul inti.
+# - [ ] Bangun sirkuit untuk menjalankan QFT pada 3 dan 4 qubit dan verifikasi hasilnya.
+# - [ ] (Stretch Goal) Implementasikan algoritma Grover untuk pencarian dalam database kecil (misal: 4 item, 2 qubit).
+# - [ ] (Ultimate Goal) Rancang kerangka untuk algoritma Shor, bahkan jika hanya untuk memfaktorkan angka yang sangat kecil seperti 15.

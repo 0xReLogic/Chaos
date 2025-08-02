@@ -7,7 +7,7 @@ Description: Implementation of Quantum Circuits for managing multiple qubits and
 import numpy as np
 from typing import Union, List, Dict, Tuple, Optional, Any
 from qubit import Qubit
-from quantum_gates import QuantumGate, SINGLE_QUBIT_GATES, apply_gate
+from quantum_gates import QuantumGate, I_GATE, SINGLE_QUBIT_GATES, apply_gate
 
 class QuantumCircuit:
     """
@@ -29,26 +29,12 @@ class QuantumCircuit:
         
         self.num_qubits = num_qubits
         # Initialize all qubits to |0⟩ state
-        self.qubits = [Qubit(0) for _ in range(num_qubits)]
+        self.state_vector = np.zeros(2**num_qubits, dtype=complex)
+        self.state_vector[0] = 1
         # List to store operations (gates and their target qubits)
         self.operations = []
     
-    def get_qubit(self, index: int) -> Qubit:
-        """
-        Get a specific qubit from the circuit.
-        
-        Args:
-            index: The index of the qubit (0-based)
-            
-        Returns:
-            The qubit at the specified index
-            
-        Raises:
-            IndexError: If the index is out of range
-        """
-        if index < 0 or index >= self.num_qubits:
-            raise IndexError(f"Qubit index {index} out of range (0 to {self.num_qubits-1})")
-        return self.qubits[index]
+
     
     def apply_gate(self, gate: Union[str, QuantumGate], qubit_index: int) -> None:
         """
@@ -112,8 +98,8 @@ class QuantumCircuit:
     
     def reset(self) -> None:
         """Reset all qubits to |0⟩ state and clear all operations."""
-        for qubit in self.qubits:
-            qubit.initialize_to_zero()
+        self.state_vector = np.zeros(2**self.num_qubits, dtype=complex)
+        self.state_vector[0] = 1
         self.operations = []
     
     def _execute_single_gate(self, gate: Union[str, QuantumGate], qubit_index: int) -> None:
@@ -124,8 +110,29 @@ class QuantumCircuit:
             gate: The gate to apply
             qubit_index: The index of the target qubit
         """
-        qubit = self.qubits[qubit_index]
-        apply_gate(qubit, gate)
+        # Ensure gate is a QuantumGate object
+        if isinstance(gate, str):
+            gate = SINGLE_QUBIT_GATES[gate]
+
+        # Create the operator for the entire system using tensor products
+        # For a gate G on qubit k in an n-qubit system, the operator is I ⊗ ... ⊗ G ⊗ ... ⊗ I
+        
+        # Start with a 1x1 identity matrix
+        operator = np.array([[1]], dtype=complex)
+        
+        for i in range(self.num_qubits):
+            if i == qubit_index:
+                # Place the actual gate at the target qubit position
+                current_gate_matrix = gate.matrix
+            else:
+                # Place an identity gate on all other qubits
+                current_gate_matrix = I_GATE.matrix
+            
+            # Tensor product with the operator built so far
+            operator = np.kron(operator, current_gate_matrix)
+
+        # Apply the full operator to the state vector
+        self.state_vector = operator @ self.state_vector
     
     def _execute_controlled_gate(self, gate: Union[str, QuantumGate], control_index: int, target_index: int) -> None:
         """
@@ -136,31 +143,43 @@ class QuantumCircuit:
             control_index: The index of the control qubit
             target_index: The index of the target qubit
         """
-        control_qubit = self.qubits[control_index]
-        target_qubit = self.qubits[target_index]
+        # Define projector matrices
+        P0 = np.array([[1, 0], [0, 0]], dtype=complex)  # Projector for |0⟩
+        P1 = np.array([[0, 0], [0, 1]], dtype=complex)  # Projector for |1⟩
         
-        # Get the probability of the control qubit being in state |1⟩
-        prob_one = control_qubit.get_probabilities()[1]
-        
-        # If the control qubit is definitely in state |0⟩, do nothing
-        if prob_one == 0:
-            return
-        
-        # If the control qubit is definitely in state |1⟩, apply the gate to the target
-        if prob_one == 1:
-            apply_gate(target_qubit, gate)
-            return
-        
-        # If the control qubit is in superposition, we need to handle entanglement
-        # This is a simplified approach for educational purposes
-        # In a real quantum computer, this would involve tensor products and more complex math
-        
-        # Measure the control qubit (this collapses the superposition)
-        control_result = control_qubit.measure()
-        
-        # If the control qubit collapsed to |1⟩, apply the gate to the target
-        if control_result == 1:
-            apply_gate(target_qubit, gate)
+        # Ensure gate is a QuantumGate object
+        if isinstance(gate, str):
+            gate = SINGLE_QUBIT_GATES[gate]
+
+        # Build the two parts of the controlled operator
+        # Part 1: Control is |0⟩, apply Identity to target
+        # Part 2: Control is |1⟩, apply Gate to target
+        term1_list = []
+        term2_list = []
+
+        for i in range(self.num_qubits):
+            if i == control_index:
+                term1_list.append(P0)
+                term2_list.append(P1)
+            elif i == target_index:
+                term1_list.append(I_GATE.matrix)
+                term2_list.append(gate.matrix)
+            else:
+                term1_list.append(I_GATE.matrix)
+                term2_list.append(I_GATE.matrix)
+
+        # Build the full operators using tensor products
+        operator1 = term1_list[0]
+        operator2 = term2_list[0]
+        for i in range(1, self.num_qubits):
+            operator1 = np.kron(operator1, term1_list[i])
+            operator2 = np.kron(operator2, term2_list[i])
+            
+        # The final operator is the sum of the two parts
+        final_operator = operator1 + operator2
+
+        # Apply the full operator to the state vector
+        self.state_vector = final_operator @ self.state_vector
     
     def run(self) -> None:
         """
@@ -192,11 +211,23 @@ class QuantumCircuit:
             IndexError: If the qubit index is out of range
         """
         if qubit_index is not None:
-            if qubit_index < 0 or qubit_index >= self.num_qubits:
-                raise IndexError(f"Qubit index {qubit_index} out of range (0 to {self.num_qubits-1})")
-            return self.qubits[qubit_index].measure()
-        else:
-            return [qubit.measure() for qubit in self.qubits]
+            raise NotImplementedError("Partial measurement is not yet implemented in Phase 4. Use measure() to measure all qubits.")
+
+        # Calculate probabilities for each state in the state vector
+        probabilities = np.abs(self.state_vector)**2
+        
+        # Choose a state based on the probabilities
+        possible_states = np.arange(len(self.state_vector))
+        measured_state_index = np.random.choice(possible_states, p=probabilities)
+        
+        # Collapse the state vector to the measured state
+        self.state_vector = np.zeros_like(self.state_vector)
+        self.state_vector[measured_state_index] = 1
+        
+        # Convert the integer index to a list of classical bits
+        # Example: index 5 (101) for 3 qubits -> [1, 0, 1]
+        binary_representation = format(measured_state_index, f'0{self.num_qubits}b')
+        return [int(bit) for bit in binary_representation]
     
     def run_and_measure(self, qubit_index: Optional[int] = None) -> Union[int, List[int]]:
         """
@@ -222,9 +253,15 @@ class QuantumCircuit:
             A string showing the state of each qubit in the circuit
         """
         result = f"Quantum Circuit with {self.num_qubits} qubits:\n"
-        for i, qubit in enumerate(self.qubits):
-            prob_zero, prob_one = qubit.get_probabilities()
-            result += f"Qubit {i}: {qubit.state} (|0⟩: {prob_zero:.4f}, |1⟩: {prob_one:.4f})\n"
+        result += f"State Vector: {self.state_vector}\n\n"
+        result += "State Probabilities:\n"
+        
+        probabilities = np.abs(self.state_vector)**2
+        for i, prob in enumerate(probabilities):
+            if prob > 1e-9: # Only show states with non-negligible probability
+                # Format state as a binary string, e.g., |01⟩ for index 1 in a 2-qubit system
+                state_str = format(i, f'0{self.num_qubits}b')
+                result += f"|{state_str}⟩: {prob:.4f}\n"
         return result
 
 
@@ -243,54 +280,4 @@ def create_bell_state() -> QuantumCircuit:
     circuit = QuantumCircuit(2)
     circuit.apply_gate("H", 0)  # Apply Hadamard to first qubit
     circuit.apply_cnot(0, 1)    # Apply CNOT with first qubit as control, second as target
-    return circuit
-
-def create_deutsch_algorithm(f_type: str) -> QuantumCircuit:
-    """
-    Create a circuit for Deutsch's Algorithm.
-    
-    Deutsch's Algorithm determines whether a function f: {0,1} -> {0,1} is constant or balanced
-    with a single function evaluation.
-    
-    Args:
-        f_type: The type of function to implement:
-            - "constant_0": f(x) = 0 for all x
-            - "constant_1": f(x) = 1 for all x
-            - "identity": f(x) = x (balanced)
-            - "negation": f(x) = NOT x (balanced)
-            
-    Returns:
-        A quantum circuit configured for Deutsch's Algorithm
-        
-    Raises:
-        ValueError: If f_type is not recognized
-    """
-    if f_type not in ["constant_0", "constant_1", "identity", "negation"]:
-        raise ValueError(f"Unknown function type: {f_type}")
-    
-    circuit = QuantumCircuit(2)
-    
-    # Initialize qubits: |0⟩ for first qubit, |1⟩ for second qubit
-    circuit.qubits[1].initialize_to_one()
-    
-    # Apply Hadamard gates to both qubits
-    circuit.apply_gate("H", 0)
-    circuit.apply_gate("H", 1)
-    
-    # Apply the function (implemented as quantum gates)
-    if f_type == "constant_1":
-        # For f(x) = 1, apply X to the second qubit
-        circuit.apply_gate("X", 1)
-    elif f_type == "identity":
-        # For f(x) = x, apply CNOT
-        circuit.apply_cnot(0, 1)
-    elif f_type == "negation":
-        # For f(x) = NOT x, apply X to first qubit, then CNOT, then X to first qubit again
-        circuit.apply_gate("X", 0)
-        circuit.apply_cnot(0, 1)
-        circuit.apply_gate("X", 0)
-    
-    # Apply final Hadamard to the first qubit
-    circuit.apply_gate("H", 0)
-    
     return circuit

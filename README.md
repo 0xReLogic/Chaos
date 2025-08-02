@@ -6,6 +6,12 @@ CHAOS is a quantum computing simulator implemented in Python. This project aims 
 
 In Greek mythology, Chaos is the primordial void from which everything is born. Similarly, quantum computers operate in the realm of probability and superposition before "collapsing" into a definite answer.
 
+The core of CHAOS is built around a powerful, modern architecture:
+
+-   **Global State Vector**: Instead of managing individual qubits, the `QuantumCircuit` now operates on a single, global state vector of size 2^n (where n is the number of qubits). This is the standard, professional approach for quantum simulation, allowing for the accurate representation of complex, system-wide states like entanglement.
+-   **Tensor Product Operations**: All quantum gates, including single-qubit and controlled gates, are applied to the state vector using their full matrix representation expanded via tensor products. This ensures that the simulation is mathematically and physically accurate.
+-   **True Entanglement**: The simulator now correctly models entanglement without shortcuts. Applying a CNOT gate to a superposition correctly generates a Bell state, where the fates of the qubits are intertwined, as demonstrated by the final state probabilities.
+
 ## Features
 
 This project builds a Python library that can:
@@ -35,29 +41,38 @@ pip install numpy
 
 ## Usage
 
-### Qubit
+Here's how to use CHAOS to simulate a simple quantum circuit.
+
+### 1. Installing Dependencies
+
+Make sure you have the required packages installed:
+
+```bash
+pip install -r requirements.txt
+```
+
+### 2. Creating an Entangled Bell State
+
+The new architecture makes creating and observing complex quantum states straightforward. Here's how to create a Bell State, a classic example of maximum entanglement:
 
 ```python
-from qubit import Qubit
+from quantum_circuit import create_bell_state
 
-# Create a qubit in state |0⟩
-q0 = Qubit(0)
+# create_bell_state is a helper function that builds the circuit
+# It applies a Hadamard gate to qubit 0, and a CNOT with control=0, target=1
+bell_circuit = create_bell_state()
 
-# Create a qubit in state |1⟩
-q1 = Qubit(1)
+# Run the simulation to apply the gates
+bell_circuit.run()
 
-# Create a qubit in superposition
-# 1/√2 |0⟩ + 1/√2 |1⟩ (50% probability of 0, 50% probability of 1)
-import numpy as np
-q_super = Qubit([1/np.sqrt(2), 1/np.sqrt(2)])
+# Print the final state vector and probabilities
+# The output will show ~50% probability for |00> and ~50% for |11>
+print(bell_circuit)
 
-# Measure the qubit
-result = q_super.measure()
-print(f"Measurement result: {result}")  # 0 or 1 with 50% probability
-
-# View probabilities
-prob_zero, prob_one = q_super.get_probabilities()
-print(f"Probability |0⟩: {prob_zero}, Probability |1⟩: {prob_one}")
+# Measure the system
+# This will collapse the state to either [0, 0] or [1, 1]
+results = bell_circuit.measure()
+print(f"Measurement results: {results}")
 ```
 
 ### Quantum Gates
