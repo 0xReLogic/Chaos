@@ -264,8 +264,8 @@ Qubits | Search Space | Iterations | Time     | Gates | Success Rate
 *Shor's quantum factorization algorithm achieving real RSA-15 breaking with 100% success rate in optimal cases, demonstrating the quantum threat to modern cryptography.*
 
 ```
-Test Case           | Period Found | Factorization | Time   | Success
---------------------|--------------|---------------|--------|--------
+Test Case          | Period Found | Factorization | Time   | Success
+-------------------|--------------|---------------|--------|--------
 N=15, a=7          | r=4 (retry)  | Partial       | 0.93s  | 33%
 N=15, a=2          | r=8          | Partial       | 0.13s  | 67%
 N=15, a=4          | r=2          | 15 = 3 × 5    | 0.14s  | 100%
