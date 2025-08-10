@@ -628,6 +628,7 @@ most_likely_state = np.argmax(probabilities)
 print(f"Probability of finding |{marked_state_str}>: {probabilities[int(marked_state_str, 2)]:.2%}")
 assert most_likely_state == int(marked_state_str, 2)
 print("\nVerification successful: Grover's algorithm found the marked state.")
+```
 
 **Grover's Single Iteration Circuit:**
 
