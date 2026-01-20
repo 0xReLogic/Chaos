@@ -903,8 +903,6 @@ python test_ultimate_scaling.py  # Ultimate unlimited scaling test with all 5 al
 python test_quantum_circuit.py   # Core circuit functionality
 python test_quantum_gates.py     # Individual gate operations  
 python test_qubit.py             # Basic qubit operations
-python test_memory_claims.py     # Memory efficiency verification
-python test_gpu_support.py       # GPU acceleration tests
 ```
 
 ### Test Coverage
@@ -912,8 +910,6 @@ python test_gpu_support.py       # GPU acceleration tests
 - **Ultimate Quantum Scaling**: Comprehensive test from 1 qubit to infinity with all 5 algorithms
 - **Algorithm Coverage**: QFT, Grover's Search, Shor's Factorization, GHZ States, Bell States
 - **Performance Testing**: Hardware stress testing with unlimited scaling capability
-- **Memory Efficiency**: Validation of CHAOS vs traditional simulator memory usage
-- **GPU Acceleration**: CUDA/CuPy performance verification
 - **Core Components**: Individual gate operations, circuit functionality, qubit behavior
 - **Grover's Algorithm**: Search success probability validation
 - **Shor's Period-Finding**: Period extraction accuracy
@@ -969,10 +965,3 @@ CHAOS has successfully achieved its primary scalability goals with GPU accelerat
 ## License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
----
-
-<p align="center">
-  <strong>Made with ❤️ by Allen Elzayn (0xReLogic)</strong><br>
-  <em>Bringing quantum computing to everyone, one qubit at a time</em>
-</p>
