@@ -85,7 +85,7 @@ The simulator's accuracy and power rest on three fundamental pillars:
 
 ## GPU Acceleration & Performance
 
-CHAOS achieves breakthrough performance in large-scale quantum simulation through memory-efficient algorithms and GPU acceleration. Unlike traditional simulators that fail beyond 10-15 qubits, CHAOS successfully demonstrates 20+ qubit simulation capabilities.
+CHAOS achieves strong performance in large-scale quantum simulation through memory-efficient algorithms and GPU acceleration. The simulator successfully demonstrates 20+ qubit simulation capabilities.
 
 ### The Scalability Problem
 
@@ -116,7 +116,7 @@ new_state = full_matrix @ state_vector  # Fails due to memory
 | 15     | 17 GB                    | 0.5 MB       | 34,000x          |
 | 20     | 16 TB                    | 16 MB        | 1,000,000x       |
 
-### CHAOS Breakthrough: Direct State Manipulation
+### CHAOS Approach: Direct State Manipulation
 
 CHAOS bypasses matrix construction entirely through direct state vector manipulation:
 
@@ -173,25 +173,14 @@ def _apply_gate_direct(self, gate_matrix, qubit_index):
 
 ### Performance Visualization
 
-Our breakthrough achievements in quantum simulation are demonstrated through comprehensive performance analysis:
-
-#### Technical Comparison Analysis
-![Technical Performance Comparison](https://files.catbox.moe/2fy3om.png)
-*Comprehensive comparison showing the 1,000,000x memory efficiency breakthrough achieved through direct state vector manipulation versus traditional matrix-based approaches.*
-
 #### Scalability Performance Analysis  
 ![Performance Scaling Analysis](https://files.catbox.moe/1n7imw.png)
 *Detailed scaling analysis demonstrating successful 16-20 qubit simulation capabilities with memory usage remaining constant at 24MB, proving our architecture's practical viability for large-scale quantum computing.*
 
-#### Google Colab Achievement Demonstration
-![Google Colab Testing Results](https://files.catbox.moe/3v1j0k.png)
-*Real-world validation showing successful 20-qubit quantum simulation on Google Colab's NVIDIA T4 GPU (14.7GB), proving accessibility and practical deployment of advanced quantum algorithms.*
-
 **Key Performance Insights:**
-- **Memory Breakthrough**: 1,000,000x improvement over traditional approaches
-- **Scalability Achievement**: 20-qubit simulation with only 24MB memory usage
-- **Real-world Validation**: Successfully tested on accessible cloud infrastructure
-- **Practical Impact**: Enables quantum algorithm research without specialized hardware
+- **Memory Efficiency**: 1,000,000x improvement over traditional approaches
+- **Scalability**: 20-qubit simulation with only 24MB memory usage
+- **Accessibility**: Enables quantum algorithm research without specialized hardware
 
 ### GPU Integration
 
@@ -218,31 +207,27 @@ python -c "import cupy; print(f'GPU: {cupy.cuda.Device().compute_capability}')"
 
 ### Industry Impact
 
-CHAOS breaks the 15-qubit barrier that limits traditional simulators:
+CHAOS breaks the 15-qubit barrier that limits many traditional simulators:
 
 #### Traditional Simulator Limitations:
 - **Qiskit Aer**: Practical limit ~20 qubits with 32GB+ RAM
 - **Cirq**: Similar memory constraints with matrix operations
-- **Most simulators**: Fail at 15 qubits due to 17GB+ memory requirements
+- **Most simulators**: Limited at 15 qubits due to 17GB+ memory requirements
 
 #### CHAOS Advantages:
 - **20+ qubits**: Demonstrated on consumer-grade GPU hardware
 - **Memory efficient**: 1000x reduction in memory requirements
 - **Scalable architecture**: Potential for 25+ qubits with high-end GPUs
-- **Research-grade capability**: Enables meaningful quantum algorithm testing
-
-### Acknowledgments
-
-Special thanks to **Google Colab** for providing accessible GPU infrastructure that enabled the development and validation of CHAOS's large-scale quantum simulation capabilities. The availability of NVIDIA T4 GPUs through Colab democratizes quantum computing research and makes advanced quantum simulation accessible to researchers worldwide.
+- **Research capability**: Enables meaningful quantum algorithm testing
 
 ## Comprehensive Performance Benchmarks
 
-CHAOS has undergone extensive real-world testing across all major quantum algorithms, demonstrating breakthrough performance and industry-leading scalability. All benchmarks were conducted on Google Colab's NVIDIA T4 GPU (14.7GB memory) to showcase accessibility on consumer-grade hardware.
+CHAOS has undergone extensive real-world testing across all major quantum algorithms. All benchmarks were conducted on Google Colab's NVIDIA T4 GPU (14.7GB memory) to showcase accessibility on consumer-grade hardware.
 
 ### Quantum Fourier Transform (QFT) Performance
 
 ![QFT Performance Analysis](https://files.catbox.moe/e2g4a2.png)
-*Comprehensive QFT performance analysis showing scalability from 8-16 qubits with breakthrough memory efficiency and execution time optimization.*
+*QFT performance analysis showing scalability from 8-16 qubits with memory efficiency and execution time optimization.*
 
 ```
 Qubits | Dimensions | Time     | Memory  | Gates | Gates/sec
@@ -254,7 +239,7 @@ Qubits | Dimensions | Time     | Memory  | Gates | Gates/sec
 16     | 65,536     | 95.37s   | 1MB     | 85    | 1
 ```
 
-**QFT Achievement**: Successfully executed 16-qubit QFT with only 1MB memory - a **16,000x improvement** over traditional simulators requiring 16GB+.
+**QFT Achievement**: Successfully executed 16-qubit QFT with only 1MB memory - a **16,000x improvement** over traditional simulators.
 
 ### Grover's Search Algorithm Performance
 
@@ -268,7 +253,7 @@ Qubits | Search Space | Iterations | Time     | Gates | Success Rate
 12     | 4,096 items  | 50         | 310.03s  | 1,812 | ~100%
 ```
 
-**Grover's Achievement**: Demonstrated **perfect quantum speedup** with √N advantage over classical search, maintaining **100% success probability** for large search spaces.
+**Grover's Achievement**: Demonstrated **quantum speedup** with √N advantage over classical search, maintaining **100% success probability** for large search spaces.
 
 ### Shor's Factorization Algorithm Performance
 
@@ -283,9 +268,9 @@ N=15, a=2          | r=8          | Partial       | 0.13s  | 67%
 N=15, a=4          | r=2          | 15 = 3 × 5    | 0.14s  | 100%
 ```
 
-**Shor's Achievement**: Successfully achieved **real quantum factorization** of N=15 in **0.14 seconds**, demonstrating the core algorithm that threatens RSA encryption.
+**Shor's Achievement**: Successfully achieved **quantum factorization** of N=15 in **0.14 seconds**, demonstrating the core algorithm that threatens RSA encryption.
 
-### Memory Efficiency Breakthrough
+### Memory Efficiency Comparison
 
 | Algorithm | Traditional Memory | CHAOS Memory | Improvement Factor |
 |-----------|-------------------|--------------|-------------------|
@@ -304,13 +289,13 @@ N=15, a=4          | r=2          | 15 = 3 × 5    | 0.14s  | 100%
 
 ### Real-World Impact
 
-This breakthrough enables:
+This approach enables:
 - **Quantum research on laptops**: No supercomputers required
 - **Educational accessibility**: Students can run real quantum algorithms  
 - **Algorithm development**: Researchers can test large-scale quantum circuits
 - **Cloud deployment**: Quantum simulation on standard cloud instances
 
-**Technical Achievement**: CHAOS is the first open-source simulator to break the 15-qubit barrier while maintaining sub-gigabyte memory requirements, democratizing access to meaningful quantum computation.
+**Technical Achievement**: CHAOS breaks the 15-qubit barrier while maintaining sub-gigabyte memory requirements.
 
 ## Installation
 
@@ -673,7 +658,7 @@ graph LR
 
 ## Shor's Algorithm: Period-Finding
 
-The crowning achievement of the CHAOS simulator is its ability to run the quantum period-finding subroutine of Shor's algorithm. This algorithm is the key to breaking modern RSA encryption and demonstrates a significant quantum advantage.
+CHAOS implements the quantum period-finding subroutine of Shor's algorithm. This algorithm is the key to breaking modern RSA encryption and demonstrates a significant quantum advantage.
 
 **Shor's Period-Finding Circuit:**
 
