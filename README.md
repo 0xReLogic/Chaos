@@ -209,11 +209,6 @@ python -c "import cupy; print(f'GPU: {cupy.cuda.Device().compute_capability}')"
 
 CHAOS breaks the 15-qubit barrier that limits many traditional simulators:
 
-#### Traditional Simulator Limitations:
-- **Qiskit Aer**: Practical limit ~20 qubits with 32GB+ RAM
-- **Cirq**: Similar memory constraints with matrix operations
-- **Most simulators**: Limited at 15 qubits due to 17GB+ memory requirements
-
 #### CHAOS Advantages:
 - **20+ qubits**: Demonstrated on consumer-grade GPU hardware
 - **Memory efficient**: 1000x reduction in memory requirements
@@ -282,9 +277,7 @@ N=15, a=4          | r=2          | 15 = 3 × 5    | 0.14s  | 100%
 
 | Simulator | Max Qubits | Memory (16-qubit) | Real Algorithms | GPU Support |
 |-----------|------------|-------------------|-----------------|-------------|
-| **Qiskit Aer** | ~15 | 16GB+ | Limited | Partial |
-| **Cirq** | ~12 | 8GB+ | Basic | No |
-| **Traditional** | ~10 | 4GB+ | Demos only | No |
+| **Traditional** | ~10-15 | 4GB-16GB+ | Limited | Partial |
 | **CHAOS** | **20+** | **1MB** | **Full Suite** | **Yes** |
 
 ### Real-World Impact
@@ -945,7 +938,7 @@ CHAOS has successfully achieved its primary scalability goals with GPU accelerat
 
 ### Phase 9: Usability & Integration
 - **Mission**: Make CHAOS more accessible and integrable with the wider quantum ecosystem.
-- **Goals**: Develop a more abstract API for circuit building, improve circuit visualization, design bridges to convert circuits from/to standard formats like Qiskit or Cirq, cloud computing integration.
+- **Goals**: Develop a more abstract API for circuit building, improve circuit visualization, design bridges to convert circuits from/to standard formats, cloud computing integration.
 
 ## License
 
